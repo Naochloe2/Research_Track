@@ -31,75 +31,78 @@ The instruction for the three exercises can be found inside the .py files (exerc
 When done, you can run the program with:
 
 ```bash
-$ python run.py exercise1.py
+$ python run.py assignment.py
 ```
 
-You have also the solutions of the exercises (folder solutions)
-
-```bash
-$ python run.py solutions/exercise1_solution.py
-```
-
-Robot API
+Pseudocode of the assignment
 ---------
 
-The API for controlling a simulated robot is designed to be as similar as possible to the [SR API][sr-api].
+While True :
+	If one_token_is_grabbed_by_the_robot :
+		If it_is_the_first_token :
+			Function_Put_the_token_in_the_center
+		Else :
+			Function_Get_distance_and_rotation_to_go_the_first_token
+			Function_Go_to_release_the_token
+	Else : 
+		Function_Get_distance_and_rotation_to_go_an_token
+		Function_Go_to_grab_the_token
 
-### Motors ###
 
-The simulated robot has two motors configured for skid steering, connected to a two-output [Motor Board](https://studentrobotics.org/docs/kit/motor_board). The left motor is connected to output `0` and the right motor to output `1`.
+Different functions :
+Function_Put_the_token_in_the_center :
+	List_of_matricule_already_took <- matricule_of_this_cube
+	Turn_little_bit
+	Go_forward_little_bit
+	Release_the_cube
+	Go_backward_from_the_cube
 
-The Motor Board API is identical to [that of the SR API](https://studentrobotics.org/docs/programming/sr/motors/), except that motor boards cannot be addressed by serial number. So, to turn on the spot at one quarter of full power, one might write the following:
+Function_Get_distance_and_rotation_to_go_an_token :
+	Define_Default_distance
+	For cube on list_of_cube_robot_can_see :  //looking for the closer cube can be see by the robot
+If (distance_from_this_cube_smaller_than_previous_one and cube_matricule_not_in_the_list) :
+			Returned_distance <- distance_from_this_cube
+			Returned_rotation <- rotation_from_this_cube
+			Returned_code <- code_of_this_cube
+	If Default_distance :
+		Return Default_values
+	Else :
+		Return_Distance_Rotation_Code_for_the_closer_cube
 
-```python
-R.motors[0].m0.power = 25
-R.motors[0].m1.power = -25
-```
+Function_Go_to_release_the_token :
+	If_robot_have_grabbed_cube <- True
+	If Default_distance :
+		Turn_little_bit
+	Elif distance_lower_than_treshold :
+		Release_the_cube
+		If_robot_have_grabbed_cube <- False
+		Go_backward_from_the_cube
+		If all_cube_are_token :
+			Exit_program
+	Elif Orientation_in_the_treshold_range :
+		If Close_to_the_goal_point :
+			Put_down_velocity
+		Else :
+			Go_forward
+	Elif Orientation_less_than_negative_treshold :
+		Go_little_bit_left
+	Elif Orientation_more_than_positive_treshold :
+		Go_little_bit_right
+	Return If_robot_have_grabbed_cube
 
-### The Grabber ###
+Function_Go_to_grab_the_token :
+If_robot_have_grabbed_cube <- True
+	If Default_distance :
+		Turn_little_bit
+	Elif distance_lower_than_treshold :
+		Grab_the_cube and If_robot_have_grabbed_cube <- True
+		List_of_matricule_already_took <- matricule_of_this_cube
+	Elif Orientation_in_the_treshold_range :
+		Go_forward
+	Elif Orientation_less_than_negative_treshold :
+		Go_little_bit_left
+	Elif Orientation_more_than_positive_treshold :
+		Go_little_bit_right
+	Return If_robot_have_grabbed_cube
 
-The robot is equipped with a grabber, capable of picking up a token which is in front of the robot and within 0.4 metres of the robot's centre. To pick up a token, call the `R.grab` method:
 
-```python
-success = R.grab()
-```
-
-The `R.grab` function returns `True` if a token was successfully picked up, or `False` otherwise. If the robot is already holding a token, it will throw an `AlreadyHoldingSomethingException`.
-
-To drop the token, call the `R.release` method.
-
-Cable-tie flails are not implemented.
-
-### Vision ###
-
-To help the robot find tokens and navigate, each token has markers stuck to it, as does each wall. The `R.see` method returns a list of all the markers the robot can see, as `Marker` objects. The robot can only see markers which it is facing towards.
-
-Each `Marker` object has the following attributes:
-
-* `info`: a `MarkerInfo` object describing the marker itself. Has the following attributes:
-  * `code`: the numeric code of the marker.
-  * `marker_type`: the type of object the marker is attached to (either `MARKER_TOKEN_GOLD`, `MARKER_TOKEN_SILVER` or `MARKER_ARENA`).
-  * `offset`: offset of the numeric code of the marker from the lowest numbered marker of its type. For example, token number 3 has the code 43, but offset 3.
-  * `size`: the size that the marker would be in the real game, for compatibility with the SR API.
-* `centre`: the location of the marker in polar coordinates, as a `PolarCoord` object. Has the following attributes:
-  * `length`: the distance from the centre of the robot to the object (in metres).
-  * `rot_y`: rotation about the Y axis in degrees.
-* `dist`: an alias for `centre.length`
-* `res`: the value of the `res` parameter of `R.see`, for compatibility with the SR API.
-* `rot_y`: an alias for `centre.rot_y`
-* `timestamp`: the time at which the marker was seen (when `R.see` was called).
-
-For example, the following code lists all of the markers the robot can see:
-
-```python
-markers = R.see()
-print "I can see", len(markers), "markers:"
-
-for m in markers:
-    if m.info.marker_type in (MARKER_TOKEN_GOLD, MARKER_TOKEN_SILVER):
-        print " - Token {0} is {1} metres away".format( m.info.offset, m.dist )
-    elif m.info.marker_type == MARKER_ARENA:
-        print " - Arena marker {0} is {1} metres away".format( m.info.offset, m.dist )
-```
-
-[sr-api]: https://studentrobotics.org/docs/programming/sr/
