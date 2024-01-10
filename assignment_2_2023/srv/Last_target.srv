@@ -1,0 +1,4 @@
+// when called,returns the coordinates of the last target sent by the user
+
+int Last_target_x
+int Last_target_y
