@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+
+<launch>
+    <include file="$(find assignment_2_2023)/launch/sim_w1.launch" />
+    <param name="des_pos_x" value= "0.0" />
+    <param name="des_pos_y" value= "1.0" />
+    <node pkg="assignment_2_2023" type="Action_client.py" name="action_client" />
+    <node pkg="assignment_2_2023" type="Info_service.py" name="info_service" />
+    <node pkg="assignment_2_2023" type="LastTarget_service.py" name="last_target_service" />
+    <node pkg="assignment_2_2023" type="go_to_point_service.py" name="go_to_point_service" />
+</launch>
