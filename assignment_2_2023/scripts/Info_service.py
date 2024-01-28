@@ -10,7 +10,7 @@ def DistanceAndSpeedService_node():
 	
 def callBack(msg):
 	
-	goal = assignment_2_2023.msg.Planning()
+	goal = assignment_2_2023.msg.PlanningActionGoal()
 	# take the target position
 	target_x = rospy.get_param("Last_target_x")
 	target_y = rospy.get_param("Last_target_y")

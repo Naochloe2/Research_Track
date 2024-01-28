@@ -3,7 +3,7 @@
 import rospy
 import actionlib
 from geometry_msgs.msg import Point, Pose, Twist
-from assignment_2_2023.msg import Param_robot
+import assignment_2_2023.msg
 from nav_msg.msg import Odometry
 
 def update_state(msg):
@@ -24,22 +24,21 @@ def update_state(msg):
 		
 def action_client_node():
 
-	def __init__(self):
-		rospy.init_node('action_client_node')
-		# Creates the SimpleActionClient, passing the type of the action to the constructor.
-		client = actionlib.SimpleActionClient('action_client',assignment_2_2023.action.Planning)
+	rospy.init_node('action_client_node')
+	# Creates the SimpleActionClient, passing the type of the action to the constructor.
+	client = actionlib.SimpleActionClient('action_client',assignment_2_2023.msg.PlanningAction)
 
-		# Waits until the action server has started up and started
-		# listening for goals.
-		client.wait_for_server()
-		pub = rospy.Publisher('/robot_position', Param_robot)
+	# Waits until the action server has started up and started
+	# listening for goals.
+	client.wait_for_server()
+	pub = rospy.Publisher('/robot_position', Param_robot)
 		
-		# subscribe to the odometry topic to receive updates on the robot's position and velocity
-		odom_subscriber = rospy.Subscriber("/odom", Odometry, update_state)
+	# subscribe to the odometry topic to receive updates on the robot's position and velocity
+	odom_subscriber = rospy.Subscriber("/odom", Odometry, update_state)
 	
 	while not rospy.is_shutdown():
 	
-		goal = assignment_2_2023.action.Planning()
+		goal = PlanningActionGoal()
 		
 		set_x = float(input("Please enter the desired X position : "))
 		set_y = float(input("Please enter the desired Y position : "))
@@ -51,6 +50,8 @@ def action_client_node():
     		client.send_goal(goal)
     		client.wait_for_result()
     		result = client.get_result()
+    		
+    		rate = rospy.Rate(1)
     		
     		if result:
             		rospy.loginfo("Target reached successfully!")
